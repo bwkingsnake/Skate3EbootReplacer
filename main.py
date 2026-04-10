@@ -7,6 +7,7 @@ from Dependencies.GUI.mainUI import Ui_MainWindow
 from Dependencies.PythonUtilities.ConfigManager import ConfigManager
 from Dependencies.PythonUtilities.EbootManager import EbootManager
 from Dependencies.PythonUtilities.GamePathManager import GamePathManager
+from Dependencies.PythonUtilities.gamePath import GameEbootPaths
 
 def get_base_path():
     if getattr(sys, 'frozen', False):
@@ -37,7 +38,7 @@ class MainWindow(QMainWindow):
             self.updateComoBox(self.eboots)
         
         if self.ConfigRpcs3Path != None:
-            print("Loading Config Path")
+            print("Loading rpcs3 path from config file")
             self.updatePathLineEdit(self.ConfigRpcs3Path)
         
     def connectSignalsToSlots(self):
@@ -90,11 +91,20 @@ class MainWindow(QMainWindow):
     
         if self.ConfigRpcs3Path != None:
             gamePathManager = GamePathManager(Path(self.ConfigRpcs3Path))
-            gameEbootPaths = gamePathManager.getSkate3RomEbootPaths()
-            if gameEbootPaths != None:
-                for path in gameEbootPaths:
-                    print(f"replacing ({path}) with {ebootName}")
-                    self.ebootmanager.copyEboot(ebootPath, path)
+            gamePaths = gamePathManager.getAllGamePaths()
+            for path in gamePaths:
+                print("-"*80)
+                if path.name != None:
+                    print(f"Name {path.name}")
+                    
+                if path.ebootDiskPath != None:
+                    print(f"DiskPath {path.ebootDiskPath}")
+                    self.ebootmanager.copyEboot(ebootPath, path.ebootDiskPath)
+
+                if path.ebootInstallPath != None:
+                    print(f"InstallPath {path.ebootInstallPath}")
+                    self.ebootmanager.copyEboot(ebootPath, path.ebootInstallPath)
+
         else:
             self.popUp("Please select your rpcs3 path pwetty pwease owo :3")
     
